@@ -6,6 +6,8 @@
     "compile:test": "npx circomkit compile add && npx circomkit prove add default && npx circomkit verify add default"
   },
   "dependencies": {
+    "@semaphore-protocol/group": "^4.0.1",
+    "@semaphore-protocol/identity": "^4.0.1",
     "circomkit": "^0.0.22",
     "circomlib": "^2.0.5"
   },

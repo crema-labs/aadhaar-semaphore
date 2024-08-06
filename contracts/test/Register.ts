@@ -1,12 +1,21 @@
-import { expect } from "chai";
 import { ethers } from "hardhat";
-import { Register, Semaphore, SemaphoreVerifier } from "../typechain-types";
+import { Register, Semaphore } from "../typechain-types";
+import { generateProof, Group, Identity } from "@semaphore-protocol/core";
+import { encodeBytes32String } from "ethers";
 
 describe("Register Contract Tests", function () {
   let register: Register;
   let semaphore: Semaphore;
+  const group = new Group();
+  const users: Identity[] = [];
+  const above18GroupId = 0;
+  const genderMaleGroupId = 1;
+  const genderFemaleGroupId = 2;
 
   beforeEach(async function () {
+    users.push(new Identity());
+    users.push(new Identity());
+
     // Deploy the SemaphoreVerifier contract
     const SemaphoreVerifierFactory = await ethers.getContractFactory(
       "SemaphoreVerifier"
@@ -33,5 +42,28 @@ describe("Register Contract Tests", function () {
     console.log("Register deployed to:", await register.getAddress());
   });
 
-  it("should pass a basic test", () => {});
+  it("should join members in the group", async () => {
+    for await (const [_, user] of users.entries()) {
+      group.addMember(user.commitment);
+
+      await register.joinAbove18(user.commitment);
+    }
+    const message = encodeBytes32String("Hello World");
+
+    const fullProof = await generateProof(
+      users[1],
+      group,
+      message,
+      above18GroupId
+    );
+
+    const transaction = await register.verifyAbove18Group(
+      fullProof.merkleTreeDepth,
+      fullProof.merkleTreeRoot,
+      fullProof.nullifier,
+      message,
+      fullProof.points
+    );
+    console.log("Proof Valid or not", transaction);
+  });
 });

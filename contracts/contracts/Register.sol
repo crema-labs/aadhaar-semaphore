@@ -2,16 +2,19 @@
 pragma solidity ^0.8.23;
 
 import "@semaphore-protocol/contracts/interfaces/ISemaphore.sol";
+import "@anon-aadhaar/contracts/interfaces/IAnonAadhaar.sol";
 import "hardhat/console.sol";
 
 contract Register {
     ISemaphore public semaphore;
+    IAnonAadhaar public anonAadhaar;
     uint256 public above18GroupId;
     uint256 public genderMaleGroupId;
     uint256 public genderFemaleGroupId;
 
-    constructor(address semaphoreAddress) {
+    constructor(address semaphoreAddress, address anonAadharAddress) {
         semaphore = ISemaphore(semaphoreAddress);
+        anonAadhaar = IAnonAadhaar(anonAadharAddress);
         above18GroupId = semaphore.createGroup(address(this));
         genderMaleGroupId = semaphore.createGroup(address(this));
         genderFemaleGroupId = semaphore.createGroup(address(this));
@@ -29,6 +32,15 @@ contract Register {
         semaphore.addMember(genderFemaleGroupId, identityCommitment);
     }
 
+    function verifyAadharProof(
+        uint nullifierSeed,
+        uint nullifier,
+        uint timestamp,
+        uint signal,
+        uint[4] calldata revealArray,
+        uint[8] calldata groth16Proof
+    ) external view returns (bool) {}
+
     function verifyAbove18Group(
         uint256 merkleTreeDepth,
         uint256 merkleTreeRoot,
@@ -36,6 +48,9 @@ contract Register {
         uint256 message,
         uint256[8] calldata points
     ) external view returns (bool) {
+        // here we want to check aadhar proof with proper nullfier whether its signed by same user or not
+        // we can also check whether user is above 18 or not
+
         ISemaphore.SemaphoreProof memory proof = ISemaphore.SemaphoreProof(
             merkleTreeDepth,
             merkleTreeRoot,

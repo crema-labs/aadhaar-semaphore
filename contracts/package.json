@@ -6,6 +6,7 @@
     "poseidon-solidity": "^0.0.5"
   },
   "dependencies": {
+    "@anon-aadhaar/contracts": "^2.4.0",
     "@semaphore-protocol/contracts": "^4.0.1",
     "@semaphore-protocol/core": "^4.0.1",
     "@semaphore-protocol/hardhat": "^4.0.1",

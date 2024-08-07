@@ -32,6 +32,48 @@ contract Register {
         semaphore.addMember(genderFemaleGroupId, identityCommitment);
     }
 
+    function sendMessageinAbove18(
+        uint nullifierSeed,
+        uint nullifier,
+        uint timestamp,
+        uint signal,
+        uint[4] calldata revealArray,
+        uint[8] calldata groth16Proof,
+        // -----------------------------
+        // ! Semaphore args
+
+        uint256 merkleTreeDepth,
+        uint256 merkleTreeRoot,
+        uint256 nullifierSemaphore,
+        uint256 message,
+        uint256[8] calldata points
+    ) external view {
+        require(revealArray[0] == 1, "Register: Age should be above 18");
+
+        require(
+            verifyAadharProof(
+                nullifierSeed,
+                nullifier,
+                timestamp,
+                signal,
+                revealArray,
+                groth16Proof
+            ),
+            "Register: Invalid proof"
+        );
+
+        require(
+            verifyAbove18Group(
+                merkleTreeDepth,
+                merkleTreeRoot,
+                nullifierSemaphore,
+                message,
+                points
+            ),
+            "Semaphore proof is not valid"
+        );
+    }
+
     function verifyAadharProof(
         uint nullifierSeed,
         uint nullifier,
@@ -39,7 +81,7 @@ contract Register {
         uint signal,
         uint[4] calldata revealArray,
         uint[8] calldata groth16Proof
-    ) external view returns (bool) {
+    ) internal view returns (bool) {
         return
             anonAadhaar.verifyAnonAadhaarProof(
                 nullifierSeed,
@@ -57,7 +99,7 @@ contract Register {
         uint256 nullifier,
         uint256 message,
         uint256[8] calldata points
-    ) external view returns (bool) {
+    ) internal view returns (bool) {
         ISemaphore.SemaphoreProof memory proof = ISemaphore.SemaphoreProof(
             merkleTreeDepth,
             merkleTreeRoot,

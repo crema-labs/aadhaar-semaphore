@@ -68,11 +68,12 @@ describe("Register Contract Tests", function () {
     console.log("Register:", await register.getAddress());
   });
 
-  it("should join members in the group", async () => {
+  it("should verify anon-aadhar proof", async () => {
     for (const user of users) {
       group.addMember(user.commitment);
       await register.joinAbove18(user.commitment);
     }
+
     const message = encodeBytes32String("Hello World");
     const fullProof = await generateProof(
       users[1],
@@ -80,31 +81,24 @@ describe("Register Contract Tests", function () {
       message,
       above18GroupId
     );
+    const { proof, user1addres } = await generatSampleProof();
+    const packedGroth16Proof = packGroth16Proof(proof.groth16Proof);
 
-    const transaction = await register.verifyAbove18Group(
+    await register.sendMessageinAbove18(
+      // above18GroupId,
+      proof.nullifierSeed,
+      proof.nullifier,
+      proof.timestamp,
+      user1addres,
+      [proof.ageAbove18, proof.gender, proof.pincode, proof.state],
+      packedGroth16Proof,
+
+      // ARGS
       fullProof.merkleTreeDepth,
       fullProof.merkleTreeRoot,
       fullProof.nullifier,
       message,
       fullProof.points
     );
-
-    console.log("Proof Valid:", transaction);
-  });
-
-  it("should verify anon-aadhar proof", async () => {
-    const { proof, user1addres } = await generatSampleProof();
-    const packedGroth16Proof = packGroth16Proof(proof.groth16Proof);
-
-    const transaction = await register.verifyAadharProof(
-      proof.nullifierSeed,
-      proof.nullifier,
-      proof.timestamp,
-      user1addres,
-      [proof.ageAbove18, proof.gender, proof.pincode, proof.state],
-      packedGroth16Proof
-    );
-
-    console.log("Proof Valid:", transaction);
   });
 });

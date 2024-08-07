@@ -1,12 +1,19 @@
-import { generateProof, Group, Identity } from "@semaphore-protocol/core";
+import {
+  generateProof,
+  Group,
+  Identity,
+  packGroth16Proof,
+} from "@semaphore-protocol/core";
 import { encodeBytes32String } from "ethers";
 import { ethers } from "hardhat";
-import { Register, Semaphore } from "../typechain-types";
+import { AnonAadhaar, Register, Semaphore } from "../typechain-types";
+import { generatSampleProof } from "./utils/utils";
 
 describe("Register Contract Tests", function () {
+  this.timeout(0);
   let register: Register;
   let semaphore: Semaphore;
-  let anonAadhaarVerifier: any;
+  let anonAadhaarVerifier: AnonAadhaar;
   const group = new Group();
   const users: Identity[] = [];
   const above18GroupId = 0;
@@ -73,6 +80,7 @@ describe("Register Contract Tests", function () {
       message,
       above18GroupId
     );
+
     const transaction = await register.verifyAbove18Group(
       fullProof.merkleTreeDepth,
       fullProof.merkleTreeRoot,
@@ -80,6 +88,23 @@ describe("Register Contract Tests", function () {
       message,
       fullProof.points
     );
+
+    console.log("Proof Valid:", transaction);
+  });
+
+  it("should verify anon-aadhar proof", async () => {
+    const { proof, user1addres } = await generatSampleProof();
+    const packedGroth16Proof = packGroth16Proof(proof.groth16Proof);
+
+    const transaction = await register.verifyAadharProof(
+      proof.nullifierSeed,
+      proof.nullifier,
+      proof.timestamp,
+      user1addres,
+      [proof.ageAbove18, proof.gender, proof.pincode, proof.state],
+      packedGroth16Proof
+    );
+
     console.log("Proof Valid:", transaction);
   });
 });

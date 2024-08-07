@@ -39,7 +39,17 @@ contract Register {
         uint signal,
         uint[4] calldata revealArray,
         uint[8] calldata groth16Proof
-    ) external view returns (bool) {}
+    ) external view returns (bool) {
+        return
+            anonAadhaar.verifyAnonAadhaarProof(
+                nullifierSeed,
+                nullifier,
+                timestamp,
+                signal,
+                revealArray,
+                groth16Proof
+            );
+    }
 
     function verifyAbove18Group(
         uint256 merkleTreeDepth,
@@ -48,9 +58,6 @@ contract Register {
         uint256 message,
         uint256[8] calldata points
     ) external view returns (bool) {
-        // here we want to check aadhar proof with proper nullfier whether its signed by same user or not
-        // we can also check whether user is above 18 or not
-
         ISemaphore.SemaphoreProof memory proof = ISemaphore.SemaphoreProof(
             merkleTreeDepth,
             merkleTreeRoot,

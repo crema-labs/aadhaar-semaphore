@@ -1,0 +1,26 @@
+type GroupCreated @entity(immutable: true) {
+  id: Bytes!
+  groupId: BigInt! # uint256
+  groupName: String! # string
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type MemberJoined @entity(immutable: true) {
+  id: Bytes!
+  groupId: BigInt! # uint256
+  identityCommitment: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type MessageSent @entity(immutable: true) {
+  id: Bytes!
+  groupId: BigInt! # uint256
+  message: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}

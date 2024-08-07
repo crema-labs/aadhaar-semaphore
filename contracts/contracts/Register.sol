@@ -16,16 +16,25 @@ contract Register {
     uint256 public genderMaleGroupId;
     uint256 public genderFemaleGroupId;
 
+    event GroupCreated(uint256 indexed groupId, string groupName);
+    event MemberJoined(uint256 indexed groupId, uint256 identityCommitment);
+    event MessageSent(uint256 indexed groupId, uint256 message);
+
     constructor(address semaphoreAddress, address anonAadharAddress) {
         semaphore = ISemaphore(semaphoreAddress);
         anonAadhaar = IAnonAadhaar(anonAadharAddress);
         above18GroupId = semaphore.createGroup(address(this));
         genderMaleGroupId = semaphore.createGroup(address(this));
         genderFemaleGroupId = semaphore.createGroup(address(this));
+
+        emit GroupCreated(above18GroupId, "Above18");
+        emit GroupCreated(genderMaleGroupId, "Male Group");
+        emit GroupCreated(genderFemaleGroupId, "Female Group");
     }
 
     function joinGroup(uint256 groupId, uint256 identityCommitment) external {
         semaphore.addMember(groupId, identityCommitment);
+        emit MemberJoined(groupId, identityCommitment);
     }
 
     // TODO sendMessageGenernic Function but it created via-ir flag problem
@@ -43,7 +52,7 @@ contract Register {
         uint256 nullifierSemaphore,
         uint256 message,
         uint256[8] calldata points
-    ) external view {
+    ) external {
         require(revealArray[0] == 1, "Register: Age should be above 18");
 
         require(
@@ -69,6 +78,7 @@ contract Register {
             ),
             "Register: Invalid Semaphore proof"
         );
+        emit MessageSent(above18GroupId, message);
     }
 
     /// @notice Sends a message in the Male Gender group
@@ -84,7 +94,7 @@ contract Register {
         uint256 nullifierSemaphore,
         uint256 message,
         uint256[8] calldata points
-    ) external view {
+    ) external {
         require(revealArray[1] == 1, "Register: Gender should be male");
 
         require(
@@ -110,6 +120,7 @@ contract Register {
             ),
             "Register: Invalid Semaphore proof"
         );
+        emit MessageSent(genderMaleGroupId, message);
     }
 
     /// @notice Sends a message in the Female Gender group
@@ -125,7 +136,7 @@ contract Register {
         uint256 nullifierSemaphore,
         uint256 message,
         uint256[8] calldata points
-    ) external view {
+    ) external {
         require(revealArray[1] == 2, "Register: Gender should be female");
 
         require(
@@ -151,6 +162,7 @@ contract Register {
             ),
             "Register: Invalid Semaphore proof"
         );
+        emit MessageSent(genderFemaleGroupId, message);
     }
 
     function verifyAadharProof(

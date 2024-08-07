@@ -5,9 +5,13 @@ import "@semaphore-protocol/contracts/interfaces/ISemaphore.sol";
 import "@anon-aadhaar/contracts/interfaces/IAnonAadhaar.sol";
 import "hardhat/console.sol";
 
+/// @title Register
+/// @notice A contract for managing groups and verifying proofs using Semaphore and AnonAadhaar
 contract Register {
     ISemaphore public semaphore;
     IAnonAadhaar public anonAadhaar;
+
+    // Group IDs for different categories
     uint256 public above18GroupId;
     uint256 public genderMaleGroupId;
     uint256 public genderFemaleGroupId;
@@ -20,28 +24,20 @@ contract Register {
         genderFemaleGroupId = semaphore.createGroup(address(this));
     }
 
-    function joinAbove18(uint256 identityCommitment) external {
-        semaphore.addMember(above18GroupId, identityCommitment);
+    function joinGroup(uint256 groupId, uint256 identityCommitment) external {
+        semaphore.addMember(groupId, identityCommitment);
     }
 
-    function joinGenderMale(uint256 identityCommitment) external {
-        semaphore.addMember(genderMaleGroupId, identityCommitment);
-    }
+    // TODO sendMessageGenernic Function but it created via-ir flag problem
 
-    function joinGenderFemale(uint256 identityCommitment) external {
-        semaphore.addMember(genderFemaleGroupId, identityCommitment);
-    }
-
-    function sendMessageinAbove18(
+    /// @notice Sends a message in the Above18 group
+    function sendMessageInAbove18Group(
         uint nullifierSeed,
         uint nullifier,
         uint timestamp,
         uint signal,
         uint[4] calldata revealArray,
         uint[8] calldata groth16Proof,
-        // -----------------------------
-        // ! Semaphore args
-
         uint256 merkleTreeDepth,
         uint256 merkleTreeRoot,
         uint256 nullifierSemaphore,
@@ -59,18 +55,101 @@ contract Register {
                 revealArray,
                 groth16Proof
             ),
-            "Register: Invalid proof"
+            "Register: Invalid Aadhaar proof"
         );
 
         require(
-            verifyAbove18Group(
+            verifySemaphoreProof(
+                above18GroupId,
                 merkleTreeDepth,
                 merkleTreeRoot,
                 nullifierSemaphore,
                 message,
                 points
             ),
-            "Semaphore proof is not valid"
+            "Register: Invalid Semaphore proof"
+        );
+    }
+
+    /// @notice Sends a message in the Male Gender group
+    function sendMessageInMaleGroup(
+        uint nullifierSeed,
+        uint nullifier,
+        uint timestamp,
+        uint signal,
+        uint[4] calldata revealArray,
+        uint[8] calldata groth16Proof,
+        uint256 merkleTreeDepth,
+        uint256 merkleTreeRoot,
+        uint256 nullifierSemaphore,
+        uint256 message,
+        uint256[8] calldata points
+    ) external view {
+        require(revealArray[1] == 1, "Register: Gender should be male");
+
+        require(
+            verifyAadharProof(
+                nullifierSeed,
+                nullifier,
+                timestamp,
+                signal,
+                revealArray,
+                groth16Proof
+            ),
+            "Register: Invalid Aadhaar proof"
+        );
+
+        require(
+            verifySemaphoreProof(
+                genderMaleGroupId,
+                merkleTreeDepth,
+                merkleTreeRoot,
+                nullifierSemaphore,
+                message,
+                points
+            ),
+            "Register: Invalid Semaphore proof"
+        );
+    }
+
+    /// @notice Sends a message in the Female Gender group
+    function sendMessageInFemaleGroup(
+        uint nullifierSeed,
+        uint nullifier,
+        uint timestamp,
+        uint signal,
+        uint[4] calldata revealArray,
+        uint[8] calldata groth16Proof,
+        uint256 merkleTreeDepth,
+        uint256 merkleTreeRoot,
+        uint256 nullifierSemaphore,
+        uint256 message,
+        uint256[8] calldata points
+    ) external view {
+        require(revealArray[1] == 2, "Register: Gender should be female");
+
+        require(
+            verifyAadharProof(
+                nullifierSeed,
+                nullifier,
+                timestamp,
+                signal,
+                revealArray,
+                groth16Proof
+            ),
+            "Register: Invalid Aadhaar proof"
+        );
+
+        require(
+            verifySemaphoreProof(
+                genderFemaleGroupId,
+                merkleTreeDepth,
+                merkleTreeRoot,
+                nullifierSemaphore,
+                message,
+                points
+            ),
+            "Register: Invalid Semaphore proof"
         );
     }
 
@@ -93,22 +172,25 @@ contract Register {
             );
     }
 
-    function verifyAbove18Group(
+    function verifySemaphoreProof(
+        uint256 groupId,
         uint256 merkleTreeDepth,
         uint256 merkleTreeRoot,
         uint256 nullifier,
         uint256 message,
         uint256[8] calldata points
     ) internal view returns (bool) {
-        ISemaphore.SemaphoreProof memory proof = ISemaphore.SemaphoreProof(
-            merkleTreeDepth,
-            merkleTreeRoot,
-            nullifier,
-            message,
-            above18GroupId,
-            points
-        );
-
-        return semaphore.verifyProof(above18GroupId, proof);
+        return
+            semaphore.verifyProof(
+                groupId,
+                ISemaphore.SemaphoreProof(
+                    merkleTreeDepth,
+                    merkleTreeRoot,
+                    nullifier,
+                    message,
+                    groupId,
+                    points
+                )
+            );
     }
 }

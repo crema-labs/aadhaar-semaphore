@@ -71,7 +71,7 @@ describe("Register Contract Tests", function () {
   it("should verify anon-aadhar proof", async () => {
     for (const user of users) {
       group.addMember(user.commitment);
-      await register.joinAbove18(user.commitment);
+      await register.joinGroup(above18GroupId, user.commitment);
     }
 
     const message = encodeBytes32String("Hello World");
@@ -84,7 +84,7 @@ describe("Register Contract Tests", function () {
     const { proof, user1addres } = await generatSampleProof();
     const packedGroth16Proof = packGroth16Proof(proof.groth16Proof);
 
-    await register.sendMessageinAbove18(
+    await register.sendMessageInAbove18Group(
       // above18GroupId,
       proof.nullifierSeed,
       proof.nullifier,

@@ -46,5 +46,59 @@ export const generatSampleProof = async () => {
   });
 
   const anonAadhaarCore = await prove(args);
+  fs.writeFileSync(
+    "proof.json",
+    JSON.stringify({ proof: anonAadhaarCore.proof, user1addres: user1addres })
+  );
   return { proof: anonAadhaarCore.proof, user1addres: user1addres };
 };
+
+// // TODO we can use HASH(PUBLIC_KEY) as the identity
+// const createIdentity = async () => {
+//   console.log("here ..... ");
+//   const id1 = new Identity();
+//   const semaphoreSubgraph = new SemaphoreSubgraph();
+//   const groupMembers = await semaphoreSubgraph.getGroupMembers("25");
+
+//   const registerContract = new RegisterContract();
+//   await registerContract.addMemberToGroup(25, id1.commitment);
+
+//   const group = new Group(groupMembers);
+//   group.addMember(id1.commitment);
+//   const message = encodeBytes32String("Hello World");
+//   const proofSemaphore = await generateProof(id1, group, message, 25);
+//   const { proof, user1addres } = AadharProofJson;
+
+//   const packedGroth16Proof = packGroth16Proof(proof.groth16Proof);
+
+//   const c = new Contract(
+//     "0x9185A1c6F7Cb004DBB5883eD9cb8CBed85ab34fD",
+//     RegisterABI,
+//     signer
+//   );
+
+//   const tx = await c.sendMessageInAbove18Group(
+//     // above18GroupId,
+//     proof.nullifierSeed, // string
+//     proof.nullifier,
+//     proof.timestamp,
+//     user1addres,
+//     [proof.ageAbove18, proof.gender, proof.pincode, proof.state],
+//     packedGroth16Proof,
+
+//     // ARGS
+//     proofSemaphore.merkleTreeDepth,
+//     proofSemaphore.merkleTreeRoot,
+//     proofSemaphore.nullifier,
+//     message,
+//     proofSemaphore.points,
+//     {
+//       gasLimit: 300000, // Increase this value as needed
+//     }
+//   );
+
+//   console.log(tx);
+//   // const aadharProof = await
+
+//   // const contract = new Contract();
+// };

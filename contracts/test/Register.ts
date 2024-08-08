@@ -86,7 +86,7 @@ describe("Register Contract Tests", function () {
 
     await register.sendMessageInAbove18Group(
       // above18GroupId,
-      proof.nullifierSeed,
+      proof.nullifierSeed, // string
       proof.nullifier,
       proof.timestamp,
       user1addres,

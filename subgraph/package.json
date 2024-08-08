@@ -1,13 +1,13 @@
 {
-  "name": "aadhaargroups",
+  "name": "aadhargroups",
   "license": "UNLICENSED",
   "scripts": {
     "codegen": "graph codegen",
     "build": "graph build",
-    "deploy": "graph deploy --node https://api.studio.thegraph.com/deploy/ aadhaargroups",
-    "create-local": "graph create --node http://localhost:8020/ aadhaargroups",
-    "remove-local": "graph remove --node http://localhost:8020/ aadhaargroups",
-    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 aadhaargroups",
+    "deploy": "graph deploy --node https://api.studio.thegraph.com/deploy/ aadhargroups",
+    "create-local": "graph create --node http://localhost:8020/ aadhargroups",
+    "remove-local": "graph remove --node http://localhost:8020/ aadhargroups",
+    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 aadhargroups",
     "test": "graph test"
   },
   "dependencies": {

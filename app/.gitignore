@@ -37,3 +37,5 @@ next-env.d.ts
 aadhaar-verifier.wasm
 circuit_final.zkey
 vkey.json
+
+.env

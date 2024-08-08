@@ -1,10 +1,17 @@
+import { RegisterContract, signer } from "@/lib/lib";
+import { useAnonAadhaar, useProver } from "@anon-aadhaar/react";
 import {
-  AnonAadhaarProof,
-  LogInWithAnonAadhaar,
-  useAnonAadhaar,
-  useProver,
-} from "@anon-aadhaar/react";
-import { useEffect } from "react";
+  generateProof,
+  Group,
+  packGroth16Proof,
+} from "@semaphore-protocol/core";
+import { SemaphoreSubgraph } from "@semaphore-protocol/data";
+import { Identity } from "@semaphore-protocol/identity";
+import "dotenv/config";
+import { useEffect, useState } from "react";
+import AadharProofJson from "../../proof.json";
+import { Contract, encodeBytes32String } from "ethers";
+import RegisterABI from "../lib/register.json";
 
 type HomeProps = {
   setUseTestAadhaar: (state: boolean) => void;
@@ -15,6 +22,7 @@ export default function Home({ setUseTestAadhaar, useTestAadhaar }: HomeProps) {
   // Use the Country Identity hook to get the status of the user.
   const [anonAadhaar] = useAnonAadhaar();
   const [, latestProof] = useProver();
+  const [commitment, setCommitment] = useState("");
 
   useEffect(() => {
     if (anonAadhaar.status === "logged-in") {
@@ -26,44 +34,65 @@ export default function Home({ setUseTestAadhaar, useTestAadhaar }: HomeProps) {
     setUseTestAadhaar(!useTestAadhaar);
   };
 
+  // // TODO we can use HASH(PUBLIC_KEY) as the identity
+  // const createIdentity = async () => {
+  //   console.log("here ..... ");
+  //   const id1 = new Identity();
+  //   const semaphoreSubgraph = new SemaphoreSubgraph();
+  //   const groupMembers = await semaphoreSubgraph.getGroupMembers("25");
+
+  //   const registerContract = new RegisterContract();
+  //   await registerContract.addMemberToGroup(25, id1.commitment);
+
+  //   const group = new Group(groupMembers);
+  //   group.addMember(id1.commitment);
+  //   const message = encodeBytes32String("Hello World");
+  //   const proofSemaphore = await generateProof(id1, group, message, 25);
+  //   const { proof, user1addres } = AadharProofJson;
+
+  //   const packedGroth16Proof = packGroth16Proof(proof.groth16Proof);
+
+  //   const c = new Contract(
+  //     "0x9185A1c6F7Cb004DBB5883eD9cb8CBed85ab34fD",
+  //     RegisterABI,
+  //     signer
+  //   );
+
+  //   const tx = await c.sendMessageInAbove18Group(
+  //     // above18GroupId,
+  //     proof.nullifierSeed, // string
+  //     proof.nullifier,
+  //     proof.timestamp,
+  //     user1addres,
+  //     [proof.ageAbove18, proof.gender, proof.pincode, proof.state],
+  //     packedGroth16Proof,
+
+  //     // ARGS
+  //     proofSemaphore.merkleTreeDepth,
+  //     proofSemaphore.merkleTreeRoot,
+  //     proofSemaphore.nullifier,
+  //     message,
+  //     proofSemaphore.points,
+  //     {
+  //       gasLimit: 300000, // Increase this value as needed
+  //     }
+  //   );
+
+  //   console.log(tx);
+  //   // const aadharProof = await
+
+  //   // const contract = new Contract();
+  // };
+
   return (
-    <div className="min-h-screen bg-gray-100 px-4 py-8">
-      <main className="flex flex-col items-center gap-8 bg-white rounded-2xl max-w-screen-sm mx-auto h-[24rem] md:h-[20rem] p-8">
-        <h1 className="font-bold text-2xl">Welcome to Anon Aadhaar Example</h1>
-        <p>Prove your Identity anonymously using your Aadhaar card.</p>
-
-        {/* Import the Connect Button component */}
-        <LogInWithAnonAadhaar nullifierSeed={1234} />
-
-        {useTestAadhaar ? (
-          <p>
-            You&apos;re using the <strong> test </strong> Aadhaar mode
-          </p>
-        ) : (
-          <p>
-            You&apos;re using the <strong> real </strong> Aadhaar mode
-          </p>
-        )}
-        <button
-          onClick={switchAadhaar}
-          type="button"
-          className="rounded bg-white px-2 py-1 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-        >
-          Switch for {useTestAadhaar ? "real" : "test"}
+    <div className="flex items-center justify-center min-h-screen bg-black">
+      <div className="text-center text-white">
+        <h2 className="text-2xl font-bold mb-4">
+          Create New Semaphore Identity
+        </h2>
+        <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+          Create an Identity
         </button>
-      </main>
-      <div className="flex flex-col items-center gap-4 rounded-2xl max-w-screen-sm mx-auto p-8">
-        {/* Render the proof if generated and valid */}
-        {anonAadhaar.status === "logged-in" && (
-          <>
-            <p>✅ Proof is valid</p>
-            <p>Got your Aadhaar Identity Proof</p>
-            <>Welcome anon!</>
-            {latestProof && (
-              <AnonAadhaarProof code={JSON.stringify(latestProof, null, 2)} />
-            )}
-          </>
-        )}
       </div>
     </div>
   );

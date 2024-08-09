@@ -34,8 +34,8 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-aadhaar-verifier.wasm
-circuit_final.zkey
-vkey.json
+public/aadhaar-verifier.wasm
+public/circuit_final.zkey
+public/vkey.json
 
 .env

@@ -18,7 +18,7 @@ export class RegisterContract {
 
   constructor() {
     this.contractInstance = new Contract(
-      "0x9185A1c6F7Cb004DBB5883eD9cb8CBed85ab34fD",
+      "0x20e104b3D87272a80f205A72741ac80ED4734c81",
       RegisterABI,
       signer
     );
